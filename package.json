@@ -1,6 +1,6 @@
 {
-  "name": "socket.io-cluster",
-  "version": "0.0.1",
+  "name": "online-system-cluster",
+  "version": "0.0.2",
   "description": "provide cluster of socket.io , that can solve more connections",
   "main": "index",
   "dependencies": {
@@ -12,7 +12,7 @@
     "node": ">= 0.10.5"
   },
   "scripts": {
-    "test": "var server = require(\"./server\");var onlineServers = server.servers;onlineServers.createServer();",
+    "test": "var server = require(\"./online-system-cluster\");var onlineServers = server.servers;onlineServers.createServer();",
     "start": "node server.js"
   },
   "readmeFilename": "Readme.md",
