@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>test online-system-cluster</title>
+<script type="text/javascript" src="http://tg.zhengjin99.com/js/jquery-1.6.1.min.js"></script>
+<script src="http://127.0.0.1:443/socket.io/socket.io.js"></script>
+<script>
+	var socket = io.connect('http://127.0.0.1:443');
+	if (io) {
+		var now = new Date().getTime();
+		socket.on('connect', function() {
+			socket.emit("msgs", {
+				cmd : 1,
+				msg : {
+					uqKey : "gigily180" + now,
+					uName : "samoin" + now,
+					module : "test",
+					type : "connect"
+				}
+			});
+		});
+		socket.on('news', function(data) {
+			data = eval("(" + data + ")");
+			if (data.type == "connect") {
+				//TODO solve someone connect event
+				//alert(data.type + "-" + data.uqKey + " connect");
+			}
+			if (data.type == "disconnect") {
+				//TODO solve someone disconnect event
+				//alert(data.type + "-" + data.uqKey + " disconnect");
+			}
+			if (data.type == "msg") {
+				if (data.msg) {
+					alert(data.type + "-" + data.uqKey + " say :" + data.msg);
+				}
+			}
+			if (data.type == "func") {
+				if (data.msg) {
+					eval(data.msg);
+				}
+			}
+			
+		});
+		socket.on('reconnect', function() {
+			//TODO
+		});
+		socket.on('disconnect', function() {
+			// in flash mode ,this may trigger twice,so ....
+			// server disconnected , will refresh current page in 5 sec...
+			//setTimeout(function(){location.reload();} , 5 * 1000);
+		});
+	}
+</script>
+
+</head>
+
+<body>
+	<input id="msg" type="text" />
+	<input type="button" onclick="talkMsg();" value="send msg" /><br/>
+	<input id="msg2" type="text" />
+	<input type="button" onclick="talkMsg2();" value="send function" />
+	<script>
+		function talkMsg() {
+			var msgStr = $("#msg").val();
+			socket.emit("msgs", {
+				cmd : 3,
+				msg : {
+					uqKey : "gigily180" + now,
+					uName : "samoin" + now,
+					module : "test",
+					type : "msg",
+					msg : msgStr
+				}
+			});
+		}
+		
+		function talkMsg2() {
+			var msgStr = $("#msg2").val();
+			socket.emit("msgs", {
+				cmd : 3,
+				msg : {
+					uqKey : "gigily180" + now,
+					uName : "samoin" + now,
+					module : "test",
+					type : "func",
+					msg : msgStr
+				}
+			});
+		}
+	</script>
+</body>
+</html>
