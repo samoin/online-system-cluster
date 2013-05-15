@@ -1,6 +1,6 @@
 {
   "name": "socket.io-cluster",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "provide cluster of socket.io , that can solve more connections",
   "main": "index",
   "dependencies": {
