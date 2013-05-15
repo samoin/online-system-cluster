@@ -116,7 +116,9 @@ server.addOnToSlave = function(slave){
                         if(!userMap[m.pid][module][uqKey]){
                             userMap[m.pid][module][uqKey] = 0;
                         }
-                        userMap[m.pid][module][uqKey] = userMap[m.pid][module][uqKey] + 1;
+                        if(userMap[m.pid][module][uqKey]){
+                            userMap[m.pid][module][uqKey] = userMap[m.pid][module][uqKey] + 1;
+                        }
                         if(!userMapAll[module][uqKey]){
                             userMapAll[module][uqKey] = 0;
                         }

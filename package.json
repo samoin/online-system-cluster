@@ -2,7 +2,7 @@
   "name": "socket.io-cluster",
   "version": "0.0.1",
   "description": "provide cluster of socket.io , that can solve more connections",
-  "main": "server.js",
+  "main": "index",
   "dependencies": {
     "socket.io": "~0.9.14"
   },
