@@ -22,7 +22,7 @@ var onlineServers = server.servers;
 onlineServers.createServer({logLv:0,port:443,slaveCount:1, 'transports': ["websocket", 'flashsocket' , "xhr-polling" , "jsonp-polling"],syncSec : 10});
 // Attention : if you are using linux(like red hat),please site "slaveCount" to 1, i tried this value more(as 2) ,but something error when i'm using ie8 to connect socket.io, it send too much "disconnect and connect event" even this socket is none.
 // i don't know why ,so i tried to change time in linux ,but it doesn't work ; then i tried to change this value to 1,then this problem disappeared , maybe it cause by node.js ,maybe not.i hope node.js will find this problem and solve it ...
-// but if you're using linux ,this is a bad project ,because it can't provide service using more cpu ,i'm sorry about this.
+// but if you're using linux(<font color="red">linux 64-bit or windows 64-bit ,my develop env is windows 32-bit</font>) ,this is a bad project ,because it can't provide service using more cpu ,i'm sorry about this.
 ```
 
 #### Client side

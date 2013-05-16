@@ -244,11 +244,15 @@ server.createSlave = function(configObj){
             var type = data.msg["type"];
             //console.log(socket["uqKey"] + ":" + socket["uName"] + ":" + socket["module"] );
             //console.log(server.slave.pid, " ", socket["uqKey"] , " ",socket["uName"]," ",socket["module"]," connected" , data);
-            server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : data});
+            if(socket["uqKey"] && socket["uName"] && socket["module"]){
+                server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : data});
+            }
         });
         socket.on('disconnect', function() {
-            console.log(server.slave.pid, " ", socket["uqKey"] , " ",socket["uName"]," ",socket["module"]," disconnect");
-            server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : {cmd:cmdObj["disconnect"],msg:{uqKey:socket["uqKey"],uName:socket["uName"],module:socket["module"],"type":"disconnect"}}});
+            if(socket["uqKey"] && socket["uName"] && socket["module"]){
+                console.log(server.slave.pid, " ", socket["uqKey"] , " ",socket["uName"]," ",socket["module"]," disconnect");
+                server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : {cmd:cmdObj["disconnect"],msg:{uqKey:socket["uqKey"],uName:socket["uName"],module:socket["module"],"type":"disconnect"}}});
+            }
         });
 
     });
