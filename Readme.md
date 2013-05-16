@@ -10,9 +10,9 @@ npm install online-system-cluster
 
 ## How to use
 
-var server = require("./online-system-cluster");
+var server = require("online-system-cluster");
 var onlineServers = server.servers;
-onlineServers.createServer();//if you want change configuration , site a proObject here
+onlineServers.createServer();//if you want change configuration , site a propertyObject here
 
 #### Server side
 
@@ -22,11 +22,12 @@ var onlineServers = server.servers;
 onlineServers.createServer({logLv:0,port:443,slaveCount:1, 'transports': ["websocket", 'flashsocket' , "xhr-polling" , "jsonp-polling"],syncSec : 10});
 /** 
     Attention : if you are using linux(like red hat),please site "slaveCount" to 1.
-    i tried this value more(as 2) ,but something error when i'm using ie8 to connect socket.io, it send too much "disconnect and connect event" even this socket is none.
+    i tried this value more(as 2) ,but something error when i'm using ie8 to connect socket.io, 
+    it send too much "disconnect and connect event" even this socket is none.
     i don't know why ,so i tried to change time in linux ,but it doesn't work ; 
     then i tried to change this value to 1,then this problem disappeared , maybe it cause by node.js ,maybe not.
-    i hope node.js will find this problem and solve it or someone help ...
-    but if you're using (linux 64-bit or windows 64-bit ,my develop env is windows 32-bit) ,this is a bad project ,
+    i hope node.js will find this problem and solve it OR someone help ...
+    if you're using (linux 64-bit or windows 64-bit ,my develop env is windows 32-bit) ,this is a bad project ,
     because it can't provide service using more cpu ,i'm sorry about this.
 */
 ```
