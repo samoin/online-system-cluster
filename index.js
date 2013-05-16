@@ -51,7 +51,9 @@ server.configSlave = function(slave){
                         var uName = msg.uName;
                         var module = msg.module;
                         var type = msg.type;
-                        server.io.sockets.emit("news" , JSON.stringify(msg));
+                        if(module && uqKey && m && m.pid){
+                            server.io.sockets.emit("news" , JSON.stringify(msg));
+                        }
                     }
                     if(cmd == cmdObj["disconnect"]){
                         var uqKey = msg.uqKey;
@@ -59,14 +61,16 @@ server.configSlave = function(slave){
                         var module = msg.module;
                         var type = msg.type;
                         //console.log(m.pid ,":",module ,":",uqKey);
-                        var countInfo = userMap[m.pid][module][uqKey];
-                        if(!countInfo){
-                            countInfo = 0;
-                        }
-                        //console.log("after ",m.pid,"-",module,"-",uqKey," disaconnect , countInfo - >" , countInfo , countInfo == 0);
-                        if(countInfo == 0){
-                            //console.log("emit all slave ", parseInt(countInfo) == 0);
-                            server.io.sockets.emit("news" , JSON.stringify(msg));
+                        if(module && uqKey && m && m.pid){
+                            var countInfo = userMap[m.pid][module][uqKey];
+                            if(!countInfo){
+                                countInfo = 0;
+                            }
+                            console.log("after ",m.pid,"-",module,"-",uqKey," disconnect , countInfo - >" , countInfo , countInfo == 0);
+                            if(countInfo == 0){
+                                //console.log("emit all slave ", parseInt(countInfo) == 0);
+                                server.io.sockets.emit("news" , JSON.stringify(msg));
+                            }
                         }
                     }
                     if(cmd == cmdObj["msg"]){
@@ -107,32 +111,37 @@ server.addOnToSlave = function(slave){
                         var uName = msg.uName;
                         var module = msg.module;
                         var type = msg.type;
-                        if(!userMap[m.pid][module]){
-                             userMap[m.pid][module] = {};
-                        }
-                        if(!userMapAll[module]){
-                            userMapAll[module] = {};
-                        }
-                        if(!userMap[m.pid][module][uqKey]){
-                            userMap[m.pid][module][uqKey] = 0;
-                        }
-                        if(userMap[m.pid][module][uqKey]){
+                        if(module && uqKey && m && m.pid){
+                            if(!userMap[m.pid][module]){
+                                 userMap[m.pid][module] = {};
+                            }
+                            if(!userMapAll[module]){
+                                userMapAll[module] = {};
+                            }
+                            if(!userMap[m.pid][module][uqKey]){
+                                userMap[m.pid][module][uqKey] = 0;
+                            }
+                            //console.log("after ",m.pid,"-",module,"-",uqKey," connect , countInfo - >" , userMap[m.pid][module][uqKey]);
                             userMap[m.pid][module][uqKey] = userMap[m.pid][module][uqKey] + 1;
+                            console.log("after add ",m.pid,"-",module,"-",uqKey," connect , countInfo - >" , userMap[m.pid][module][uqKey]);
+                            if(!userMapAll[module][uqKey]){
+                                userMapAll[module][uqKey] = 0;
+                            }
+
+                            userMapAll[module][uqKey] = userMapAll[module][uqKey] + 1;
+                            server.emitAllSlave({pcmd : masterTalkSlaveKey , msg :userMap , type:"sync2"});
                         }
-                        if(!userMapAll[module][uqKey]){
-                            userMapAll[module][uqKey] = 0;
-                        }
-                        userMapAll[module][uqKey] = userMapAll[module][uqKey] + 1;
-                        server.emitAllSlave({pcmd : masterTalkSlaveKey , msg :userMap , type:"sync2"});
                     }
                     if(cmd == cmdObj["disconnect"]){
                         var uqKey = msg.uqKey;
                         var uName = msg.uName;
                         var module = msg.module;
                         var type = msg.type;
-                        userMap[m.pid][module][uqKey] = userMap[m.pid][module][uqKey] - 1;
-                        userMapAll[module][uqKey] = userMapAll[module][uqKey] - 1;
-                        server.emitAllSlave({pcmd : masterTalkSlaveKey , msg :userMap , type:"sync2"});
+                        if(module && uqKey && m && m.pid){
+                            userMap[m.pid][module][uqKey] = userMap[m.pid][module][uqKey] - 1;
+                            userMapAll[module][uqKey] = userMapAll[module][uqKey] - 1;
+                            server.emitAllSlave({pcmd : masterTalkSlaveKey , msg :userMap , type:"sync2"});
+                        }
                     }
                     server.emitAllSlave(m);
                 }
@@ -185,9 +194,9 @@ server.createServer = function(configrue){
     } else if (cluster.isWorker){
         server.configSlave(process);
         server.createSlave(server.configrue);
-        setInterval(function(){
+        /**setInterval(function(){
             console.log(process.pid ," get sync info-userMapAll from cluster : ", JSON.stringify(userMapAll));
-        } , 1000 * server.configrue.syncSec);
+        } , 1000 * server.configrue.syncSec);*/
     }
     // add dead event to cluster
     function addDeathEventToCluster(worker){
@@ -220,26 +229,28 @@ server.createSlave = function(configObj){
 
     server.io.configure(function() {
         server.io.set('transports', configObj.transports);
+        server.io.set('close timeout', 30);
+        server.io.set('heartbeat timeout', 30);
+        server.io.set('heartbeat interval', 15);
+        server.io.set('polling duration', 15);
+        server.io.set('flash policy server', false);
     });
     server.io.sockets.on('connection', function(socket) {
-        /**socket.on('onlineList', function(data) {
-            socket.emit('news', {
-                cmd : 3,
-                msg : JSON.stringify(userMap)
-            });
-        });*/
         socket.on('msgs', function(data) {
             //console.log(process.pid," " ,server.slave.pid," get msgs : " + JSON.stringify(data));
             socket["uqKey"] = data.msg["uqKey"];
             socket["uName"] = data.msg["uName"];
             socket["module"] = data.msg["module"];
+            var type = data.msg["type"];
             //console.log(socket["uqKey"] + ":" + socket["uName"] + ":" + socket["module"] );
+            //console.log(server.slave.pid, " ", socket["uqKey"] , " ",socket["uName"]," ",socket["module"]," connected" , data);
             server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : data});
         });
         socket.on('disconnect', function() {
-            //console.log(socket["uqKey"] + ":" + socket["uName"] + ":" + socket["module"] );
+            console.log(server.slave.pid, " ", socket["uqKey"] , " ",socket["uName"]," ",socket["module"]," disconnect");
             server.slave.send({pcmd : masterTalkSlaveKey ,  type:"msgs" , pid : server.slave.pid , msg : {cmd:cmdObj["disconnect"],msg:{uqKey:socket["uqKey"],uName:socket["uName"],module:socket["module"],"type":"disconnect"}}});
         });
+
     });
 
     server.io.sockets.on('error', function() {
